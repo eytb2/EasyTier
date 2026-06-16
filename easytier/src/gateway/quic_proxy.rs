@@ -343,7 +343,7 @@ impl NatDstConnector for NatDstQuicConnector {
                             .context("connection failed")
                     }
                 })
-                .hedge(Duration::from_millis(200));
+                .hedge(Duration::from_millis(2000));
 
             self.conn_map
                 .try_get_with(dst_peer, connect)

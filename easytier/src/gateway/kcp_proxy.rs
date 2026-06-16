@@ -161,7 +161,7 @@ impl NatDstConnector for NatDstKcpConnector {
                     KcpStream::new(&kcp_endpoint, conn_id).context("failed to create kcp stream")
                 }
             })
-            .hedge(Duration::from_millis(200))
+            .hedge(Duration::from_millis(2000))
             .await
             .context("failed to connect to peer")?;
 
