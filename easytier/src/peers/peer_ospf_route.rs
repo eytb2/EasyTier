@@ -3220,7 +3220,7 @@ impl RouteSessionManager {
                 };
 
                 // if we are initiator, we should ensure the dst has the session.
-                let sync_as_initiator = if last_sync.elapsed().as_secs() > 10 {
+                let sync_as_initiator = if last_sync.elapsed().as_secs() > 60 {
                     last_sync = Instant::now();
                     true
                 } else {

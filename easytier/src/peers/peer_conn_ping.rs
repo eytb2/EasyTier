@@ -66,7 +66,7 @@ impl PingIntervalController {
             last_send_logic_time: 0,
 
             backoff_idx: 0,
-            max_backoff_idx: 5,
+            max_backoff_idx: 6,
 
             last_throughput,
         }
@@ -336,7 +336,7 @@ impl PeerConnPinger {
                 my_node_id
             );
 
-            if loss_counter.load(Ordering::Relaxed) >= 5 {
+            if loss_counter.load(Ordering::Relaxed) >= 10 {
                 tracing::warn!(
                     ?ret,
                     ?self,
