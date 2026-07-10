@@ -61,7 +61,7 @@ impl PingIntervalController {
         Self {
             throughput,
             loss_counter,
-            interval: tokio::time::interval(Duration::from_secs(1)),
+            interval: tokio::time::interval(Duration::from_secs(60)),
             logic_time: 0,
             last_send_logic_time: 0,
 

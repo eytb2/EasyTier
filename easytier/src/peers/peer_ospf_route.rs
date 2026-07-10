@@ -3252,7 +3252,7 @@ impl RouteSessionManager {
             sync_now = sync_now.resubscribe();
 
             select! {
-                _ = tokio::time::sleep(Duration::from_secs(1)) => {}
+                _ = tokio::time::sleep(Duration::from_secs(60)) => {}
                 ret = sync_now.recv() => if let Err(e) = ret {
                     tracing::debug!(?e, "session_task sync_now recv failed, ospf route may exit");
                     break;
