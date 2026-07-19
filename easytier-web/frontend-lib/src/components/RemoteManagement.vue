@@ -428,7 +428,7 @@ let periodFunc = new Utils.PeriodicTask(async () => {
     } catch (e) {
         console.debug(e);
     }
-}, 1000);
+}, 5000);
 
 onMounted(async () => {
     periodFunc.start();

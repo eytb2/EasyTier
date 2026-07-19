@@ -24,7 +24,7 @@ const periodFunc = new Utils.PeriodicTask(async () => {
         toast.add({ severity: 'error', summary: 'Load Summary Failed', detail: e, life: 2000 });
         console.error(e);
     }
-}, 1000);
+}, 5000);
 
 onMounted(async () => {
     periodFunc.start();
