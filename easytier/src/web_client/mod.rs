@@ -188,6 +188,8 @@ impl WebClient {
                 session.start_heartbeat().await;
                 session.wait().await;
                 connected.store(false, Ordering::Release);
+                log::warn!("Secure session ended, waiting 1 second before reconnecting...");
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                 continue;
             }
 
@@ -222,6 +224,8 @@ impl WebClient {
             session.start_heartbeat().await;
             session.wait().await;
             connected.store(false, Ordering::Release);
+            log::warn!("Session ended, waiting 1 second before reconnecting...");
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
     }
 

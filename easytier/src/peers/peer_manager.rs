@@ -2004,6 +2004,13 @@ impl PeerManager {
         nic_pipeline.clear();
 
         self.peer_rpc_mgr.rpc_server().registry().unregister_all();
+        
+        let peers = self.peers.list_peers().await;
+        for peer in peers {
+            let _ = self.peers.close_peer(peer.peer_id).await;
+        }
+        
+        self.tasks.lock().await.abort_all();
     }
 
     pub async fn close_peer_conn(
