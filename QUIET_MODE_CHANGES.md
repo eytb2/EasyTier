@@ -20,8 +20,13 @@
 - **OSPF_UPDATE_MY_GLOBAL_FOREIGN_NETWORK_INTERVAL_SEC**: 从 `10秒` 修改为 `60秒`。降低开启 Proxy CIDR 时的广播频率。
 
 ### 4. 传输层心跳 (TCP Keepalive & Web Client)
-- **TCP Keepalive**: 已修改为 300 秒，减少底层 TCP 连接保活包。
-- **Web Session Heartbeat**: 已修改为 300 秒，降低节点与中心配置服务器的通信频率。
+- **TCP Keepalive**: 已修改为 120 秒首次 / 30 秒间隔，减少底层 TCP 连接保活包。
+- **Web Session Heartbeat**: 已修改为 60 秒（原 300 秒会导致会话被服务端反复杀掉，见第 5 节），降低节点与中心配置服务器的通信频率。
+
+### 5. Web 会话心跳与服务端超时的配套 (2026-08-17 修复)
+easytier-web 服务端对每个节点会话设有 RPC 空闲超时（`easytier-web/src/client_manager/session.rs` 的 `set_rx_timeout`，上游默认 30 秒）：30 秒收不到节点的任何 RPC 包就销毁会话。心跳间隔改为 300 秒后，每个会话都会在心跳后 30 秒被服务端杀死，节点随后重连，形成约 45 秒周期的"上线 30 秒 / 离线十几秒"循环，表现为管理页面经常显示 0 客户端在线，并产生大量重连流量。
+- **客户端心跳** (`easytier/src/web_client/session.rs`): 300 秒 → **60 秒**。
+- **服务端会话空闲超时** (`easytier-web/src/client_manager/session.rs`): 30 秒 → **120 秒**（为心跳间隔的 2 倍冗余）。
 
 ## 效果总结
 经过以上修改，无业务流量状态下的 EasyTier 会从“每秒数个控制包”进入深度静默状态。常规的心跳和对账频率被压制在 1~5 分钟级别，闲置流量开销降低 95% 以上，且断网发现与恢复时间依然保持在合理范围（约 5 分钟）。

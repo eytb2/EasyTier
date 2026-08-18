@@ -500,7 +500,7 @@ impl Session {
         let data = Arc::new(RwLock::new(session_data));
 
         let rpc_mgr =
-            BidirectRpcManager::new().set_rx_timeout(Some(std::time::Duration::from_secs(30)));
+            BidirectRpcManager::new().set_rx_timeout(Some(std::time::Duration::from_secs(120)));
 
         rpc_mgr.rpc_server().registry().register(
             WebServerServiceServer::new(SessionRpcService { data: data.clone() }),

@@ -74,7 +74,7 @@ impl Session {
         let controller = Arc::downgrade(&controller);
 
         let ctx_clone = ctx.clone();
-        let mut tick = interval(std::time::Duration::from_secs(300));
+        let mut tick = interval(std::time::Duration::from_secs(60));
         let client = rpc_mgr
             .rpc_client()
             .scoped_client::<WebServerServiceClientFactory<BaseController>>(1, 1, "".to_string());
