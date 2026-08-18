@@ -2,6 +2,27 @@
 
 此分支 (`quiet-v2.6.4`) 专门为减少闲置状态下的背景流量而创建。为了达到极致的“静默”效果，在保证组网不掉线的前提下，对源码中的高频保活、测速和路由同步逻辑进行了大幅度的间隔延长。
 
+## 修改总览对比表
+
+| 项目 | 文件 | 原始值 (v2.6.4) | 我的修改 | 后续修正 (2026-08-19) | 说明 |
+|---|---|---|---|---|---|
+| P2P Ping 基准间隔 | `easytier/src/peers/peer_conn_ping.rs` | 1 秒 | **60 秒** | — | 闲时心跳约降 120 倍 |
+| Ping 最大退避乘数 | `easytier/src/peers/peer_conn_ping.rs` | 5 (2^5=32s) | **6** (2^6) | — | 完全空闲时最长 3840 秒一个包 |
+| 断线判定丢包阈值 | `easytier/src/peers/peer_conn_ping.rs` | 5 次 | **10 次** | — | 最坏黑窗约 10~11 分钟 |
+| OSPF 会话循环休眠 | `easytier/src/peers/peer_ospf_route.rs` | 1 秒 | **60 秒** | — | 事件驱动的即时同步不受影响 |
+| OSPF 主动对账间隔 | `easytier/src/peers/peer_ospf_route.rs` | 10 秒 | **60 秒** | — | 路由老化 3660s，远大于此值 |
+| 外部网段广播间隔 | `easytier/src/common/constants.rs` | 10 秒 | **60 秒** | — | 降低 Proxy CIDR 广播频率 |
+| 代理连接 hedge 间隔 | `easytier/src/gateway/kcp_proxy.rs`、`quic_proxy.rs` | 200 毫秒 | **2000 毫秒** | — | v2.6.4 新增的对冲连接，疑似触发公司 DDoS 告警的主因之一 |
+| TCP Keepalive (代理) | `easytier/src/gateway/tcp_proxy.rs` | 5s 首次 / 2s 间隔 | **120s / 30s** | — | 死连接检测从 ~9s 变 ~3min |
+| Web 客户端心跳 | `easytier/src/web_client/session.rs` | 1 秒 | 300 秒 | **60 秒** | 300s 会触发服务端会话超时被反复杀掉（见第 5 节） |
+| Web 客户端断线重连 | `easytier/src/web_client/mod.rs` | 无等待（紧密循环） | **+1 秒等待** | — | 消除重连风暴 |
+| **Web 服务端会话空闲超时** | `easytier-web/src/client_manager/session.rs` | 30 秒 | 未改动 | **120 秒** | 与 60s 心跳配套（2 倍冗余），修复“0 客户端在线”问题 |
+| Web 前端轮询间隔 | `easytier-web/frontend` 3 个组件 | 1000 毫秒 | **5000 毫秒** | — | 管理页面数据稍滞后 |
+| 退出时任务清理 | `easytier/src/peers/peer_manager.rs` | 无（任务泄漏） | **close_peer + abort_all** | — | 修复断开连接后的任务泄漏 |
+| CI 自动构建 | `.github/workflows/core.yml` | 不含本分支 | **加入 quiet-v2.6.4** | — | push 即出构建产物 |
+
+> 未采纳的待定建议（见评估记录）：断线阈值回落到 5 次以缩短黑窗、HedgeExt 错误分支增加退避、`close_peer` 增加超时保护。
+
 ## 核心修改清单
 
 ### 1. P2P 测速心跳与容错判定 (peer_conn_ping.rs)
