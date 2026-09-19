@@ -4,10 +4,10 @@
 
 ## 修改总览对比表
 
-| 项目 | 文件 | 原始值 (v2.6.4) | 我的修改 | 后续修正 (2026-08-19) | 说明 |
+| 项目 | 文件 | 原始值 (v2.6.4) | 我的修改 | 后续修正 (2026-09-19) | 说明 |
 |---|---|---|---|---|---|
-| P2P Ping 基准间隔 | `easytier/src/peers/peer_conn_ping.rs` | 1 秒 | **60 秒** | — | 闲时心跳约降 120 倍 |
-| Ping 最大退避乘数 | `easytier/src/peers/peer_conn_ping.rs` | 5 (2^5=32s) | **6** (2^6) | — | 完全空闲时最长 3840 秒一个包 |
+| P2P Ping 基准间隔 | `easytier/src/peers/peer_conn_ping.rs` | 1 秒 | **60 秒** | **30 秒** | 闲时心跳约降 30 倍 |
+| Ping 最大退避乘数 | `easytier/src/peers/peer_conn_ping.rs` | 5 (2^5=32s) | **6** (2^6) | **2** (30×2²=120s) | 空闲时最长 120s 一个包，NAT 映射不过期，重连零冷启动；流量仍比原始版低约 3.7 倍 |
 | 断线判定丢包阈值 | `easytier/src/peers/peer_conn_ping.rs` | 5 次 | **10 次** | — | 最坏黑窗约 10~11 分钟 |
 | OSPF 会话循环休眠 | `easytier/src/peers/peer_ospf_route.rs` | 1 秒 | **60 秒** | — | 事件驱动的即时同步不受影响 |
 | OSPF 主动对账间隔 | `easytier/src/peers/peer_ospf_route.rs` | 10 秒 | **60 秒** | — | 路由老化 3660s，远大于此值 |
