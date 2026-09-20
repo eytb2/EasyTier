@@ -181,7 +181,9 @@ jobs:
             BUILD=zigbuild
           fi
 
-          if [[ "$TARGET" =~ ^(riscv64|loongarch64|aarch64).*$ || "$TARGET" =~ (freebsd|windows) ]]; then
+          # jemalloc's configure cannot handle zig as CC on arm32
+          # (unsupported -mcpu=generic+v6+...); use mimalloc there.
+          if [[ "$TARGET" =~ ^(riscv64|loongarch64|aarch64|armv[67]|arm-).*$ || "$TARGET" =~ (freebsd|windows) ]]; then
             FEATURES="mimalloc"
           else
             FEATURES="jemalloc"
