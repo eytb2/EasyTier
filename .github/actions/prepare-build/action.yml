@@ -89,18 +89,11 @@ runs:
       # needs libatomic.a from a real arm32 musl toolchain.
       if: ${{ contains(inputs.target, 'arm-unknown-linux-musl') || contains(inputs.target, 'armv7-unknown-linux-musl') }}
       run: |
-        case "${{ inputs.target }}" in
-          arm-unknown-linux-musleabihf) MUSL_GCC=arm-linux-musleabihf-cross ;;
-          arm-unknown-linux-musleabi)   MUSL_GCC=arm-linux-musleabi-cross ;;
-          armv7-unknown-linux-musleabihf) MUSL_GCC=armv7l-linux-musleabihf-cross ;;
-          armv7-unknown-linux-musleabi)   MUSL_GCC=armv7l-linux-musleabi-cross ;;
-          *) MUSL_GCC="" ;;
-        esac
-        [[ -z "$MUSL_GCC" ]] && exit 0
+        TARGET="${{ inputs.target }}"
         mkdir -p ./musl_gcc
-        wget --inet4-only -c "https://musl.cc/${MUSL_GCC}.tgz" -P ./musl_gcc/
-        tar xf "./musl_gcc/${MUSL_GCC}.tgz" -C ./musl_gcc/
-        # toolchain layout: <dir>/<triple>/lib/libatomic.a
+        wget --inet4-only -c "https://github.com/cross-tools/musl-cross/releases/download/20250520/${TARGET}.tar.xz" -P ./musl_gcc/
+        tar xf "./musl_gcc/${TARGET}.tar.xz" -C ./musl_gcc/
+        # toolchain layout: <dir>/<triple>/<triple>/lib/libatomic.a
         LIBATOMIC_DIR="$(dirname "$(find "$(pwd)/musl_gcc" -name libatomic.a | head -1)")"
         [[ -f "$LIBATOMIC_DIR/libatomic.a" ]] || { echo "libatomic.a not found" >&2; exit 1; }
         echo "RUSTFLAGS=-L native=$LIBATOMIC_DIR" >> $GITHUB_ENV
